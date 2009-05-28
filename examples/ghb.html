@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub Browser</title>
+  <!-- Combo-handled YUI CSS files: --> 
+  <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?2.7.0/build/treeview/assets/skins/sam/treeview.css"> 
+  <!-- Combo-handled YUI JS files: --> 
+  <script type="text/javascript" src="http://yui.yahooapis.com/combo?2.7.0/build/yahoo-dom-event/yahoo-dom-event.js&2.7.0/build/treeview/treeview-min.js"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+  <script type="text/javascript" src="../deps/jsclass.js"></script>
+  <script type="text/javascript" src="../src/github.js"></script>
+  <script type="text/javascript">
+    $(function(){           
+      $('form').submit(function(){
+        $('#user').text('Loading...');
+        $('#file').text('');
+        $('#tree').text('');
+        var user = new GitHub.User($('#username').attr('value'));
+        user.load('basic', showUser);
+        return false;
+      });
+    });
+    
+    function showUser(user) {
+      var box = $('#user');
+      box.text('Welcome ' + user.name + '. Here are your repos:');
+      $('#tree').text('Loading...');
+      user.load('repos', showRepos);
+    }
+    
+    function showRepos(user) {
+      var tree = new YAHOO.widget.TreeView("tree");
+      tree.setDynamicLoad(loadLeaves);
+      tree.subscribe('clickEvent', clicked);
+      var root = tree.getRoot();
+      
+      for (var i in user.repos) {
+        var repo = user.repos[i];
+        var node = new YAHOO.widget.TextNode(repo.name, root, false);
+        // Store the object in the node
+        $(node).data('object', repo);
+      }
+      
+      tree.draw();
+    }
+    
+    function clicked(thing) {
+      var object = $(thing.node).data('object');
+      
+      // Load the file if it's a blob
+      if (object.isA(GitHub.Blob)) {
+        $('#file').text('Loading...');
+        object.load(function() {
+          $('#file').text(object.data);
+        });
+      }
+    }
+    
+    function loadLeaves(node, completed) {
+      var object = $(node).data('object');
+      
+      // If it's a repo, load the branches
+      if (object.isA(GitHub.Repo)) {
+        object.load('branches', function(){
+          for (var i in object.branches) {
+            var tree = object.tree(object.branches[i]);
+            var child = new YAHOO.widget.TextNode(i, node, false);
+            $(child).data('object', tree);
+          }
+          completed();
+        });
+      // If it's a tree, load the children
+      } else if (object.isA(GitHub.Tree)) {
+        object.load(function() {
+          for (var i in object.children) {
+            var tree = object.children[i];
+            var child = new YAHOO.widget.TextNode(tree.name, node, false);
+            $(child).data('object', tree);
+            if (tree.type == 'blob') {
+              child.isLeaf = true;
+            }
+          }
+          completed();
+        });
+      }
+    }
+  </script>
+</head>
+<body>
+  <form>
+    Username: <input type="text" id="username">
+    <input type="submit" value="Fetch info">
+  </form>
+  <div id="user"></div>
+  <div id="tree"></div>
+  <pre id="file"></pre>
+</body>
+</html>

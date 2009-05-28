@@ -1,0 +1,28 @@
+<html>
+	<head>
+	  <title>GitHub.js specs</title>
+		<link type="text/css" rel="stylesheet" href="../vendor/jspec/jspec.css" />
+		<script src="../vendor/jspec/jspec.js"></script>
+    <script src="../vendor/jsclass/class.js" type="text/javascript"></script>
+    <script src="../src/github.js" type="text/javascript"></script>
+		<script>
+			function runSuites() {
+				JSpec
+				.exec('spec.core.js')
+				.exec('spec.helpers.js')
+				.exec('spec.loader.js')
+				.exec('spec.simple.js')
+				.exec('spec.user.js')
+				.exec('spec.repo.js')
+				.exec('spec.rest.js')
+				.run()
+				.report()
+			}
+		</script>
+	</head>
+	<body class="jspec" onLoad="runSuites();">
+		<div id="jspec-top"><h2 id="jspec-title">GitHub.js <em>JSpec <script>document.write(JSpec.version)</script></em></h2></div>
+		<div id="jspec"></div>
+		<div id="jspec-bottom"></div>
+	</body>
+</html>

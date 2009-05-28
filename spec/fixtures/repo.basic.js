@@ -1,0 +1,1 @@
+{"repository": {"description": "the 4k pocket full-of-gags web microframework", "forks": 2, "name": "camping", "private": false, "url": "http://github.com/judofyr/camping", "watchers": 16, "fork": true, "owner": "judofyr", "homepage": "http://code.whytheluckystiff.net/camping/"}}
